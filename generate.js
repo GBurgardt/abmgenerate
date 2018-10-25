@@ -1,6 +1,7 @@
 var fs = require('fs');
 
-const defaultDir = 'C:/Users/kernel/German/Projects/scriptsAuto/abmGenerate';
+// const defaultDir = 'C:/Users/kernel/German/Projects/scriptsAuto/abmGenerate';
+const defaultDir = 'C:/Users/kernel/German/Projects/facturacion/src/app/pages/main/tablas';
 
 const upperFirstLetter = (str) => str && str.length > 0 ? 
     str[0].toUpperCase().concat(str.substring(1)) : null;
@@ -79,10 +80,10 @@ const createIndexTs = (dir, name) => {
 /**
  * Crea los files de la carpeta raiz
  */
-const createRootFiles = (abmName, abmModelName, abmModelId) => {
+const createRootFiles = (abmName, abmModelName, abmModelId, nameResource) => {
 
 
-    const createRootComponentTs = (abmName, abmModelName, abmModelId) => {
+    const createRootComponentTs = (abmName, abmModelName, abmModelId, nameResource) => {
         const dir = `${defaultDir}/${abmName}/${abmName}.component.ts`;
         const body = 
 `import { Component } from '@angular/core';
@@ -108,7 +109,7 @@ export class ${upperFirstLetter(abmName)} {
         private recursoService: RecursoService
     ) {
         this.tableColumns = []
-        this.tableData = this.recursoService.getRecursoList(resourcesREST.${abmName})();
+        this.tableData = this.recursoService.getRecursoList(resourcesREST.${nameResource})();
     }
 
     onClickEdit = (rec: ${upperFirstLetter(abmModelName)}) => {
@@ -122,9 +123,9 @@ export class ${upperFirstLetter(abmName)} {
             '¿Estás seguro de borrarlo?'
         )(
            async () => {
-                await this.recursoService.borrarRecurso(recurso.${abmModelId})(resourcesREST.${abmName});
+                await this.recursoService.borrarRecurso(recurso.${abmModelId})(resourcesREST.${nameResource});
 
-                this.tableData = this.recursoService.getRecursoList(resourcesREST.${abmName})();
+                this.tableData = this.recursoService.getRecursoList(resourcesREST.${nameResource})();
             }
         )({
             tipoModal: 'confirmation'
@@ -141,11 +142,11 @@ export class ${upperFirstLetter(abmName)} {
     createIndexTs(`${defaultDir}/${abmName}/index.ts`, abmName);
     createHtml(`${defaultDir}/${abmName}/${abmName}.html`, abmName, abmName);
     createScss(`${defaultDir}/${abmName}/${abmName}.scss`, abmName);
-    createRootComponentTs(abmName, abmModelName, abmModelId);
+    createRootComponentTs(abmName, abmModelName, abmModelId, nameResource);
 }
 
 
-const createComponentTs = (dir, abmName, abmModelName, fileName, className, abmModelId) => {
+const createComponentTs = (dir, abmName, abmModelName, fileName, className, abmModelId, nameResource) => {
     const body = fileName.includes('nuevo') ?
 `import { Router } from '@angular/router';
 import { UtilsService } from '../../../../../../services/utilsService';
@@ -224,7 +225,7 @@ export class ${upperFirstLetter(fileName)} {
         private recursoService: RecursoService
     ) {
         this.route.params.subscribe(params => 
-            this.recursoService.getRecursoList(resourcesREST.${abmName})()
+            this.recursoService.getRecursoList(resourcesREST.${nameResource})()
                 .map((recursoList: ${upperFirstLetter(abmModelName)}[]) =>
                     recursoList.find(recurso => recurso.${abmModelId} === parseInt(params.${abmModelId}))
                 )
@@ -278,7 +279,7 @@ export class ${upperFirstLetter(fileName)} {
 /**
  * Crea nuevo y editar
  */
-const createComponentFiles = (abmName, abmModelName, abmModelId) => {
+const createComponentFiles = (abmName, abmModelName, abmModelId, nameResource) => {
     const createNuevo = (abmName, abmModelName, abmModelId) => {
         const dirComponents = `${defaultDir}/${abmName}/components/`;
         const fileName = `nuevo${upperFirstLetter(abmName)}`;
@@ -288,7 +289,7 @@ const createComponentFiles = (abmName, abmModelName, abmModelId) => {
         createHtml(`${dirComponents}/${fileName}/${fileName}.html`, className, `Nuevo ${abmModelName}`);
         createScss(`${dirComponents}/${fileName}/${fileName}.scss`, className);
 
-        createComponentTs(`${dirComponents}/${fileName}/${fileName}.component.ts`, abmName, abmModelName, fileName, className, abmModelId);
+        createComponentTs(`${dirComponents}/${fileName}/${fileName}.component.ts`, abmName, abmModelName, fileName, className, abmModelId, nameResource);
     }
 
     const createEditar = (abmName, abmModelName, abmModelId) => {
@@ -300,7 +301,7 @@ const createComponentFiles = (abmName, abmModelName, abmModelId) => {
         createHtml(`${dirComponents}/${fileName}/${fileName}.html`, className, `Modificar ${abmModelName}`);
         createScss(`${dirComponents}/${fileName}/${fileName}.scss`, className);
 
-        createComponentTs(`${dirComponents}/${fileName}/${fileName}.component.ts`, abmName, abmModelName, fileName, className, abmModelId);
+        createComponentTs(`${dirComponents}/${fileName}/${fileName}.component.ts`, abmName, abmModelName, fileName, className, abmModelId, nameResource);
     }
     createEditar(abmName, abmModelName, abmModelId);
     createNuevo(abmName, abmModelName, abmModelId);
@@ -312,10 +313,11 @@ const generate = () => {
     const abmName = readline.question('Nombre abm: ')
     const abmModelName = readline.question('Nombre model: ')
     const abmModelId = readline.question('Nombre id model: ')
+    const nameResource = readline.question('Nombre resource: ')
 
     createStructure(abmName);
-    createRootFiles(abmName, abmModelName, abmModelId)
-    createComponentFiles(abmName, abmModelName, abmModelId)
+    createRootFiles(abmName, abmModelName, abmModelId, nameResource)
+    createComponentFiles(abmName, abmModelName, abmModelId, nameResource)
 }
 
 generate()
